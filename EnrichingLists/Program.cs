@@ -14,6 +14,9 @@ namespace Enriching_lists
             FindAndSetDescription(tableMain, tableInstr);
             
             tableMain.UpdateData();
+            
+            Console.WriteLine("Готово!");
+            Console.ReadKey();
         }
 
         internal static Timetable GetTimeTable(string message)
@@ -32,15 +35,18 @@ namespace Enriching_lists
                 for (var i = 0; i < secondaryTable.Items.Count; i++)
                 {
                     var key = secondaryTable.Items[i].Key;
-                    var record = mainTable.Items
+                    var record = secondaryTable.Items
                         .FirstOrDefault(e => e.Key == key)?
                         .Description ?? default;
 
-                    if (string.IsNullOrWhiteSpace(mainTable.Items[i].Description) && record != default &&
-                        !string.IsNullOrWhiteSpace(record))
-                    {
-                        mainTable.Items[i].Description = record;
-                    }
+                    
+
+                    if (!string.IsNullOrWhiteSpace(mainTable.Items[i].Description) || string.IsNullOrWhiteSpace(record)) 
+                        continue;
+                    
+                    var index = mainTable.Items.FindIndex(e => e.Key == key);
+                    mainTable.Items[index].Description = record;
+                    Console.WriteLine($"Данные для {key} занесены: {record}");
                 }
             }
         }
