@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enriching-lists", "Enriching-lists\Enriching-lists.csproj", "{0D3F5692-A5FB-49D2-BC3A-F85DECEB3D30}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnrichingLists", "EnrichingLists\EnrichingLists.csproj", "{0D3F5692-A5FB-49D2-BC3A-F85DECEB3D30}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
