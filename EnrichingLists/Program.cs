@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using ClosedXML.Excel;
+using Spire.Xls;
 
 namespace Enriching_lists
 {
@@ -23,6 +24,9 @@ namespace Enriching_lists
         {
             Console.Write(message);
             var path = Console.ReadLine()?.TrimStart('\"').TrimEnd('\"');
+            
+            path = RenameFile(path);
+            
             var timetable = new Timetable(path);
             timetable.LoadData();
             return timetable;
@@ -41,11 +45,15 @@ namespace Enriching_lists
 
                     
 
-                    if (!string.IsNullOrWhiteSpace(mainTable.Items[i].Description) || string.IsNullOrWhiteSpace(record)) 
+                    if (string.IsNullOrWhiteSpace(record)) 
                         continue;
-                    
+
                     var index = mainTable.Items.FindIndex(e => e.Key == key);
-                    mainTable.Items[index].Description = record;
+                    if (index < 0)
+                    {
+                        continue;
+                    }
+                    mainTable.Items[index].AddDescription(record);
                     Console.WriteLine($"Данные для {key} занесены: {record}");
                 }
             }
@@ -55,9 +63,12 @@ namespace Enriching_lists
         {
             Console.Write(message);
             var pathDir = Console.ReadLine()?.TrimStart('\"').TrimEnd('\"');
+            
+            RenameFiles(pathDir);
+            
             var files = Directory.GetFiles(pathDir);
 
-            var result = new List<Timetable>();
+            var result = new List<Timetable>(files.Length);
 
             foreach (var path in files)
             {
@@ -68,6 +79,36 @@ namespace Enriching_lists
             }
 
             return result;
+        }
+
+        internal static void RenameFiles(string directory)
+        {
+            var pathDir = directory.TrimStart('\"').TrimEnd('\"');
+            var files = Directory.GetFiles(pathDir);
+
+            foreach (var file in files)
+            {
+                RenameFile(file);
+            }
+        }
+
+        internal static string RenameFile(string file)
+        {
+            var arr = file.Split(".").ToList();
+            arr.RemoveAll(e => e == string.Empty);
+            var extension = arr.LastOrDefault();
+            if (!string.Equals(extension, "xlsx"))
+            {
+                arr[^1] = "xlsx";
+                var newName = !string.Equals(extension, "xlsx") ? string.Join(".", arr) : file;
+                Workbook workbook = new Workbook();
+                workbook.LoadFromFile(file);
+                workbook.SaveToFile(newName, ExcelVersion.Version2016);
+                File.Delete(file);
+                file = newName;
+            }
+
+            return file;
         }
     }
 }
