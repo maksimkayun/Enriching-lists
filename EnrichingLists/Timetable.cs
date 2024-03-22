@@ -44,6 +44,9 @@ public class Timetable
         this.path = path;
     }
 
+    /// <summary>
+    /// Для "прибытие", modeArrival = true
+    /// </summary>
     public void LoadData()
     {
         using var wbook = new XLWorkbook(path);
@@ -74,7 +77,42 @@ public class Timetable
             Items.Add(obj);
         }
     }
+    
+    /// <summary>
+    /// Для "отсутствующие", modeArrival = false
+    /// </summary>
+    public void LoadData2()
+    {
+        using var wbook = new XLWorkbook(path);
+        var sheet = wbook.Worksheet(1);
 
+
+        var headers = ConfigHelper.Headers;
+        for (var i = 5; i <= sheet.Rows().Count(); i++)
+        {
+            if (sheet.Row(i).IsHidden)
+            {
+                continue;
+            }
+
+            var row = sheet.Row(i);
+            if (string.IsNullOrWhiteSpace(row.Cell(1).GetValue<string>()) || row.IsMerged())
+            {
+                break;
+            }
+            
+            
+            var obj = new RecordObject
+            {
+                NumberTrain = row.Cell(headers["Номер поезда\nпри отпр."]).GetValue<string>(),
+                DateTime = DateTime.Parse(row.Cell(headers["Дата\nотправления"]).GetValue<string>()),
+                Route = row.Cell(headers["Маршрут:Отправление"]).GetValue<string>() + " - " + row.Cell(headers["Маршрут:Прибытие"]).GetValue<string>(),
+                Description = row.Cell(headers["Причина"]).GetValue<string>()
+            };
+            Items.Add(obj);
+        }
+    }
+    
     public void UpdateData()
     {
         using var wbook = new XLWorkbook(path);
@@ -99,6 +137,52 @@ public class Timetable
                 $"{row.Cell(header.IndexOfColumn("Маршрут")).GetValue<string>()}";
             
             var increment = header.IndexOfColumn("Причина");
+            var value = sheet.Cell(i, increment).GetValue<string>();
+            while (!string.IsNullOrWhiteSpace(value))
+            {
+                increment++;
+                value = sheet.Cell(i, increment).GetValue<string>();
+            }
+
+            var item = Items.FirstOrDefault(e => e.Key == key);
+            sheet.Cell(i, increment).Value = item?.Description;
+            if (item?.AdditionalDescriptions != null && item.AdditionalDescriptions.Any())
+            {
+                foreach (var desc in item.AdditionalDescriptions)
+                {
+                    increment++;
+                    sheet.Cell(i, increment).Value = desc;
+                }
+            }
+        }
+        
+        wbook.Save();
+    }
+    
+    public void UpdateData2()
+    {
+        using var wbook = new XLWorkbook(path);
+        var sheet = wbook.Worksheet(1);
+        var headers = ConfigHelper.Headers;
+
+        for (var i = 5; i <= sheet.Rows().Count(); i++)
+        {
+            if (sheet.Row(i).IsHidden)
+            {
+                continue;
+            }
+
+            var row = sheet.Row(i);
+            if (string.IsNullOrWhiteSpace(row.Cell(1).GetValue<string>()) || row.IsMerged())
+            {
+                break;
+            }
+            var key =
+                $"{row.Cell(headers["Номер поезда\nпри отпр."]).GetValue<string>()}_" +
+                $"{DateTime.Parse(row.Cell(headers["Дата\nотправления"]).GetValue<string>())}_" +
+                $"{row.Cell(headers["Маршрут:Отправление"]).GetValue<string>() + " - " + row.Cell(headers["Маршрут:Прибытие"]).GetValue<string>()}";
+            
+            var increment = headers["Причина"];
             var value = sheet.Cell(i, increment).GetValue<string>();
             while (!string.IsNullOrWhiteSpace(value))
             {

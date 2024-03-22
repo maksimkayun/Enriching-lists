@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using ClosedXML.Excel;
+using Irony.Parsing;
 using Spire.Xls;
 
 namespace Enriching_lists
@@ -9,18 +10,23 @@ namespace Enriching_lists
     {
         public static void Main(string[] args)
         {
-            var tableMain = GetTimeTable("Введите путь до файла с данными (основной) >");
-            var tableInstr = GetTimeTableDirectory("Введите путь до ДИРЕКТОРИИ с файлами с данными (инструкторские) >");
+            
+            Console.Write("Выберите режим работы (1 - прибытие, 2 - отсутствующие) >");
+            var modeArrival = Console.ReadLine() == "1";
+            
+            var tableMain = GetTimeTable("Введите путь до файла с данными (основной) >", modeArrival);
+            var tableInstr = GetTimeTableDirectory("Введите путь до ДИРЕКТОРИИ с файлами с данными (инструкторские) >", modeArrival);
             
             FindAndSetDescription(tableMain, tableInstr);
             
-            tableMain.UpdateData();
+            if(modeArrival) tableMain.UpdateData();
+            else tableMain.UpdateData2();
             
             Console.WriteLine("Готово!");
             Console.ReadKey();
         }
 
-        internal static Timetable GetTimeTable(string message)
+        internal static Timetable GetTimeTable(string message, bool arrival = true)
         {
             Console.Write(message);
             var path = Console.ReadLine()?.TrimStart('\"').TrimEnd('\"');
@@ -28,7 +34,9 @@ namespace Enriching_lists
             path = RenameFile(path);
             
             var timetable = new Timetable(path);
-            timetable.LoadData();
+            if (arrival) timetable.LoadData(); 
+            else timetable.LoadData2();
+            
             return timetable;
         }
 
@@ -59,7 +67,7 @@ namespace Enriching_lists
             }
         }
 
-        internal static List<Timetable> GetTimeTableDirectory(string message)
+        internal static List<Timetable> GetTimeTableDirectory(string message, bool arrival = true)
         {
             Console.Write(message);
             var pathDir = Console.ReadLine()?.TrimStart('\"').TrimEnd('\"');
@@ -73,7 +81,8 @@ namespace Enriching_lists
             foreach (var path in files)
             {
                 var timetable = new Timetable(path);
-                timetable.LoadData();
+                if(arrival) timetable.LoadData();
+                else timetable.LoadData2();
 
                 result.Add(timetable);
             }
