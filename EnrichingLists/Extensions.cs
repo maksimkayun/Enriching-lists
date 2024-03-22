@@ -13,6 +13,16 @@ public static class Extensions
             inc++;
         }
 
+        if (text.Equals("Причина"))
+        {
+            inc++;
+            while ((row.Cell(inc).GetValue<string>() != text || row.Worksheet.Column(inc).IsHidden) &&
+                   (!string.IsNullOrWhiteSpace(row.Cell(inc).GetValue<string>()) || row.Worksheet.Column(inc).IsHidden))
+            {
+                inc++;
+            }
+        }
+
         return inc;
     }
 }

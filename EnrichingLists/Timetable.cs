@@ -51,7 +51,7 @@ public class Timetable
 
         var header = sheet.Row(2);
         
-        for (var i = 3; i <= sheet.Rows().Count(); i++)
+        for (var i = 5; i <= sheet.Rows().Count(); i++)
         {
             if (sheet.Row(i).IsHidden)
             {
@@ -59,7 +59,7 @@ public class Timetable
             }
 
             var row = sheet.Row(i);
-            if (string.IsNullOrWhiteSpace(row.Cell(1).GetValue<string>()))
+            if (string.IsNullOrWhiteSpace(row.Cell(1).GetValue<string>()) || row.IsMerged())
             {
                 break;
             }
@@ -69,7 +69,7 @@ public class Timetable
                 NumberTrain = row.Cell(header.IndexOfColumn("Номер\nпоезда")).GetValue<string>(),
                 DateTime = DateTime.Parse(row.Cell(header.IndexOfColumn("Дата\nотправления")).GetValue<string>()),
                 Route = row.Cell(header.IndexOfColumn("Маршрут")).GetValue<string>(),
-                Description = row.Cell(header.IndexOfColumn(string.Empty)).GetValue<string>()
+                Description = row.Cell(header.IndexOfColumn("Причина")).GetValue<string>()
             };
             Items.Add(obj);
         }
@@ -81,7 +81,7 @@ public class Timetable
         var sheet = wbook.Worksheet(1);
         var header = sheet.Row(2);
 
-        for (var i = 3; i <= sheet.Rows().Count(); i++)
+        for (var i = 5; i <= sheet.Rows().Count(); i++)
         {
             if (sheet.Row(i).IsHidden)
             {
@@ -89,7 +89,7 @@ public class Timetable
             }
 
             var row = sheet.Row(i);
-            if (string.IsNullOrWhiteSpace(row.Cell(1).GetValue<string>()))
+            if (string.IsNullOrWhiteSpace(row.Cell(1).GetValue<string>()) || row.IsMerged())
             {
                 break;
             }
@@ -98,7 +98,7 @@ public class Timetable
                 $"{DateTime.Parse(row.Cell(header.IndexOfColumn("Дата\nотправления")).GetValue<string>())}_" +
                 $"{row.Cell(header.IndexOfColumn("Маршрут")).GetValue<string>()}";
             
-            var increment = header.IndexOfColumn(string.Empty);
+            var increment = header.IndexOfColumn("Причина");
             var value = sheet.Cell(i, increment).GetValue<string>();
             while (!string.IsNullOrWhiteSpace(value))
             {
